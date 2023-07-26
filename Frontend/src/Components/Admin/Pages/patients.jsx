@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminNavbar from "../Navbar/navbar";
 import axios from "axios";
+import { Button } from "@material-tailwind/react";
 
 
 
@@ -9,13 +10,27 @@ import axios from "axios";
 function Patients(){
     const [doctorsdata,setdocdata]=useState([]);
     useEffect(()=>{
-        axios.get("http://localhost:8000/api/users/admin_patients")
+        setPatient();
+    },[])
+
+    const setPatient = () =>{
+        axios.get("http://localhost:8000/api/admin/admin_patients")
         .then((response)=>{
             setdocdata(response.data)
             console.log(doctorsdata)
         })
-    },[])
+    }
 
+    const activeHandler = (e) =>{
+        e.preventDefault();
+        console.log(e.target.value)
+        axios.post("http://localhost:8000/api/admin/block_user", {'id':e.target.value})
+        .then((response)=>{
+            console.log(response)
+            setPatient();
+        })
+    }
+    
     return(
         <>
         <AdminNavbar></AdminNavbar>
@@ -45,15 +60,14 @@ function Patients(){
                                 User
                             </th>
                             <th scope="col" className="px-5 py-3 text-sm font-normal text-left text-gray-800 uppercase bg-white border-b border-gray-200">
-                                Role
+                                Email
+                            </th>
+
+                            <th scope="col" className="px-5 py-3 text-sm font-normal text-left text-gray-800 uppercase bg-white border-b border-gray-200">
+                              
                             </th>
                             <th scope="col" className="px-5 py-3 text-sm font-normal text-left text-gray-800 uppercase bg-white border-b border-gray-200">
-                                Created at
-                            </th>
-                            <th scope="col" className="px-5 py-3 text-sm font-normal text-left text-gray-800 uppercase bg-white border-b border-gray-200">
-                                status
-                            </th>
-                            <th scope="col" className="px-5 py-3 text-sm font-normal text-left text-gray-800 uppercase bg-white border-b border-gray-200">
+                            status
                             </th>
                         </tr>
                     </thead>
@@ -72,7 +86,12 @@ function Patients(){
                                         </div> */}
                                         <div className="ml-3">
                                             <p className="text-gray-900 whitespace-no-wrap">
-                                            {item.username}
+                                            {item.first_name}
+                                            </p>
+                                        </div>
+                                        <div className="ml-3">
+                                            <p className="text-gray-900 whitespace-no-wrap">
+                                            {item.last_name}
                                             </p>
                                         </div>
                                     </div>
@@ -84,14 +103,14 @@ function Patients(){
                                 </td>
                                 <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
                                     <p className="text-gray-900 whitespace-no-wrap">
-                                        {item.user}
+                    
                                     </p>
                                 </td>
                                 <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
                                     <span className="relative inline-block px-3 py-1 font-semibold leading-tight text-green-900">
                                         <span aria-hidden="true" className="absolute inset-0 bg-green-200 rounded-full opacity-50">
                                         </span>
-                                        {item ? (<span className="relative">
+                                        {item.is_active ? (<span className="relative">
                                             active
                                         </span>):(   <span className="relative">
                                             Inactive
@@ -100,9 +119,11 @@ function Patients(){
                                     </span>
                                 </td>
                                 <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
-                                    <a href="#" className="text-indigo-600 hover:text-indigo-900">
-                                        Edit
-                                    </a>
+                                    {item.is_active ?(
+                                        <Button onClick={activeHandler} value={item.user} color="red">Block</Button>
+                                    ):(
+                                        <Button onClick={activeHandler} value={item.user} color="Green">Unblock</Button>
+                                    )}
                                 </td>
                                 
                             </tr>
@@ -113,34 +134,7 @@ function Patients(){
 
                     </tbody>
                 </table>
-                <div className="flex flex-col items-center px-5 py-5 bg-white xs:flex-row xs:justify-between">
-                    <div className="flex items-center">
-                        <button type="button" className="w-full p-4 text-base text-gray-600 bg-white border rounded-l-xl hover:bg-gray-100">
-                            <svg width="9" fill="currentColor" height="8" className="" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1427 301l-531 531 531 531q19 19 19 45t-19 45l-166 166q-19 19-45 19t-45-19l-742-742q-19-19-19-45t19-45l742-742q19-19 45-19t45 19l166 166q19 19 19 45t-19 45z">
-                                </path>
-                            </svg>
-                        </button>
-                        <button type="button" className="w-full px-4 py-2 text-base text-indigo-500 bg-white border-t border-b hover:bg-gray-100 ">
-                            1
-                        </button>
-                        <button type="button" className="w-full px-4 py-2 text-base text-gray-600 bg-white border hover:bg-gray-100">
-                            2
-                        </button>
-                        <button type="button" className="w-full px-4 py-2 text-base text-gray-600 bg-white border-t border-b hover:bg-gray-100">
-                            3
-                        </button>
-                        <button type="button" className="w-full px-4 py-2 text-base text-gray-600 bg-white border hover:bg-gray-100">
-                            4
-                        </button>
-                        <button type="button" className="w-full p-4 text-base text-gray-600 bg-white border-t border-b border-r rounded-r-xl hover:bg-gray-100">
-                            <svg width="9" fill="currentColor" height="8" className="" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1363 877l-742 742q-19 19-45 19t-45-19l-166-166q-19-19-19-45t19-45l531-531-531-531q-19-19-19-45t19-45l166-166q19-19 45-19t45 19l742 742q19 19 19 45t-19 45z">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>

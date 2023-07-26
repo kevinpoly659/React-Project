@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import Patients,Doctors
+from .models import Patients,Doctors,Roles,Appointments
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -30,7 +30,29 @@ class PatientCreateSerializer(serializers.ModelSerializer):
 
         return user1
 
-class PatientSerializers(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model=User
+        fields = ('id','username','email','password')
+
+
+    def create(self,validated_data):
+        if validated_data['password']:
+            user=User.objects.create_user(
+                username = validated_data['username'],
+                email = validated_data['email'],
+                password = validated_data['password'],
+            )
+            user.save()
+            user1=User.objects.get(username=validated_data['username'])
+
+
+            return user1
+        else: 
+            return None
+
+class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = User
@@ -45,6 +67,22 @@ class PatientSerializers(serializers.ModelSerializer):
     
     username = serializers.CharField()
     password = serializers.CharField()
+
+
+class PatientSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model  = Patients
+        fields = "__all__"
+
+    # def login(self,validated_data):
+    #     user = User.objects.get(username=validated_data['username'])
+    #     if user.check_password(validated_data['password']):
+    #         return user
+    #     else:
+    #         return None
+    
+
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -75,8 +113,7 @@ class DoctorCreateSerializer(serializers.ModelSerializer):
         )
         user.save()
         user1=User.objects.get(username=validated_data['username'])
-        doctor = Doctors.objects.create(user=user1)
-        doctor.save()
+
 
         return user1
 
@@ -115,4 +152,26 @@ class AdminSerializers(serializers.ModelSerializer):
 class DoctorlistSerializers(serializers.ModelSerializer):
     class Meta:
         model = Doctors
-        fields = ['user']
+        fields = "__all__"
+
+class PatientlistSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Patients
+        fields = "__all__"
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Roles
+        fields = "__all__"
+    
+    role_name = serializers.CharField()
+
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointments
+        fields = "__all__"
+    def create(self, validated_data):
+        Appointment = Appointments.objects.create(patient = validated_data['patient'],doctors=validated_data['doctor'])
+        Appointment.save()
+        return super().create(validated_data)

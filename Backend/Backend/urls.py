@@ -16,10 +16,29 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from django.core.asgi import get_asgi_application
+from django.urls import re_path
+from Chat import consumers
 
 urlpatterns = [
 
-    path('api/users/', include('users.urls')), 
+    path('api/users/', include('users.urls')),
+    path('api/doctor/',include('Doctor.urls')),
+    path('api/patient/',include('Patient.urls')),
+    path('api/admin/',include('Admin.urls')),
+    path('api/booking/',include('Booking.urls')),
+    path('api/chat/',include('Chat.urls')),
+
     path('admin/', admin.site.urls),
 
-]
+
+    # path('ws/', include('Chat.routing.websocket')),
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+
